@@ -1,0 +1,701 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <title>Weekly Routine Tracker</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: #f5f5f5;
+            color: #333;
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+        
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 0;
+            background: white;
+            min-height: 100vh;
+        }
+        
+        header {
+            background: #2c3e50;
+            color: white;
+            padding: 20px;
+            text-align: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        
+        header h1 {
+            font-size: 24px;
+            font-weight: 600;
+        }
+        
+        .date-info {
+            font-size: 14px;
+            opacity: 0.9;
+            margin-top: 5px;
+        }
+        
+        .tabs {
+            display: flex;
+            background: #34495e;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+        
+        .tab {
+            flex: 1;
+            min-width: 100px;
+            padding: 12px 16px;
+            text-align: center;
+            color: white;
+            cursor: pointer;
+            transition: background 0.3s;
+            font-size: 14px;
+            white-space: nowrap;
+        }
+        
+        .tab.active {
+            background: #2c3e50;
+            border-bottom: 3px solid #3498db;
+        }
+        
+        .content {
+            padding: 20px;
+            display: none;
+        }
+        
+        .content.active {
+            display: block;
+        }
+        
+        .time-block {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .time-block input[type="checkbox"] {
+            width: 24px;
+            height: 24px;
+            cursor: pointer;
+        }
+        
+        .time-block label {
+            flex: 1;
+            cursor: pointer;
+        }
+        
+        .time-block .time {
+            font-weight: 600;
+            color: #2c3e50;
+            min-width: 80px;
+        }
+        
+        .time-block.completed {
+            background: #e8f5e9;
+            opacity: 0.8;
+        }
+        
+        .health-tracker {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+        
+        .health-tracker h3 {
+            margin-bottom: 15px;
+            color: #2c3e50;
+        }
+        
+        .metric {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 0;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .metric:last-child {
+            border-bottom: none;
+        }
+        
+        .metric label {
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .metric .target {
+            font-size: 12px;
+            color: #666;
+        }
+        
+        .metric input[type="number"] {
+            width: 100px;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            text-align: center;
+            font-size: 16px;
+        }
+        
+        .wins {
+            margin-top: 20px;
+        }
+        
+        .wins h3 {
+            margin-bottom: 10px;
+            color: #2c3e50;
+        }
+        
+        .win-input {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+        
+        .schedule-table {
+            overflow-x: auto;
+            margin: -20px;
+            padding: 20px;
+        }
+        
+        .schedule-table table {
+            width: 100%;
+            min-width: 500px;
+            border-collapse: collapse;
+            font-size: 12px;
+        }
+        
+        .schedule-table th {
+            background: #2c3e50;
+            color: white;
+            padding: 10px 5px;
+            text-align: left;
+            position: sticky;
+            top: 0;
+        }
+        
+        .schedule-table td {
+            padding: 8px 5px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .schedule-table tr:nth-child(even) {
+            background: #f8f9fa;
+        }
+        
+        .schedule-table .time-col {
+            font-weight: 600;
+            color: #2c3e50;
+            white-space: nowrap;
+        }
+        
+        .templates {
+            display: grid;
+            gap: 15px;
+        }
+        
+        .template-card {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 15px;
+            border-left: 4px solid #3498db;
+        }
+        
+        .template-card h4 {
+            color: #2c3e50;
+            margin-bottom: 5px;
+        }
+        
+        .template-card p {
+            font-size: 14px;
+            color: #666;
+        }
+        
+        .rules {
+            display: grid;
+            gap: 15px;
+        }
+        
+        .rule {
+            background: #fff3cd;
+            border-radius: 8px;
+            padding: 15px;
+            border-left: 4px solid #ffc107;
+        }
+        
+        .rule h4 {
+            color: #856404;
+            margin-bottom: 5px;
+        }
+        
+        .rule p {
+            font-size: 14px;
+            color: #856404;
+        }
+        
+        button {
+            background: #3498db;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 4px;
+            font-size: 16px;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 20px;
+        }
+        
+        button:active {
+            background: #2980b9;
+        }
+        
+        .reset-day {
+            background: #e74c3c;
+        }
+        
+        @media (max-width: 600px) {
+            .schedule-table {
+                font-size: 11px;
+            }
+            
+            .schedule-table th, .schedule-table td {
+                padding: 6px 3px;
+            }
+        }
+        
+        .progress-bar {
+            background: #ecf0f1;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-top: 10px;
+            height: 20px;
+        }
+        
+        .progress-fill {
+            background: #3498db;
+            height: 100%;
+            transition: width 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 12px;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>📱 Routine Tracker</h1>
+            <div class="date-info" id="dateInfo"></div>
+        </header>
+        
+        <div class="tabs">
+            <div class="tab active" onclick="showTab('today')">Today</div>
+            <div class="tab" onclick="showTab('schedule')">Schedule</div>
+            <div class="tab" onclick="showTab('templates')">Templates</div>
+            <div class="tab" onclick="showTab('rules')">Rules</div>
+        </div>
+        
+        <div class="content active" id="today">
+            <h2>Daily Checklist</h2>
+            <div id="dailyChecklist"></div>
+            
+            <div class="health-tracker">
+                <h3>📊 Health Metrics</h3>
+                <div class="metric">
+                    <label>
+                        Calories
+                        <span class="target">(Target: 2000-2200)</span>
+                    </label>
+                    <input type="number" id="calories" placeholder="0" onchange="saveData()">
+                </div>
+                <div class="metric">
+                    <label>
+                        Water 💧
+                        <span class="target">(Target: 8 glasses)</span>
+                    </label>
+                    <input type="number" id="water" placeholder="0" onchange="saveData()">
+                </div>
+                <div class="metric">
+                    <label>
+                        Steps 👟
+                        <span class="target">(Target: 5000+)</span>
+                    </label>
+                    <input type="number" id="steps" placeholder="0" onchange="saveData()">
+                </div>
+                <div class="metric">
+                    <label>
+                        Blood Glucose
+                        <span class="target">(Target: <140)</span>
+                    </label>
+                    <input type="number" id="glucose" placeholder="0" onchange="saveData()">
+                </div>
+                <div class="metric">
+                    <label>Weight (kg)</label>
+                    <input type="number" id="weight" step="0.1" placeholder="0" onchange="saveData()">
+                </div>
+            </div>
+            
+            <div class="wins">
+                <h3>🏆 Today's Wins</h3>
+                <input type="text" class="win-input" id="win1" placeholder="Win #1" onchange="saveData()">
+                <input type="text" class="win-input" id="win2" placeholder="Win #2" onchange="saveData()">
+                <input type="text" class="win-input" id="win3" placeholder="Win #3" onchange="saveData()">
+            </div>
+            
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressBar">0%</div>
+            </div>
+            
+            <button class="reset-day" onclick="resetDay()">Reset Today</button>
+        </div>
+        
+        <div class="content" id="schedule">
+            <h2>Weekly Schedule</h2>
+            <div class="schedule-table">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Time</th>
+                            <th>Mon-Fri</th>
+                            <th>Weekend</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="time-col">9:00-9:30</td>
+                            <td>Wake + Water + Movement</td>
+                            <td>Flexible Wake (9-11am)</td>
+                        </tr>
+                        <tr>
+                            <td class="time-col">9:30-10:00</td>
+                            <td>Breakfast + Log</td>
+                            <td>Brunch + Walk</td>
+                        </tr>
+                        <tr>
+                            <td class="time-col">10:00-12:00</td>
+                            <td><strong>Work Focus Block #1</strong></td>
+                            <td>Social/Errands</td>
+                        </tr>
+                        <tr>
+                            <td class="time-col">12:00-12:15</td>
+                            <td>Movement Break</td>
+                            <td rowspan="2">Flexible Afternoon</td>
+                        </tr>
+                        <tr>
+                            <td class="time-col">12:15-14:00</td>
+                            <td><strong>Work Focus Block #2</strong></td>
+                        </tr>
+                        <tr>
+                            <td class="time-col">14:00-14:30</td>
+                            <td>Lunch + Log</td>
+                            <td rowspan="3">Gaming/Chill</td>
+                        </tr>
+                        <tr>
+                            <td class="time-col">14:30-16:30</td>
+                            <td><strong>Work Focus Block #3</strong></td>
+                        </tr>
+                        <tr>
+                            <td class="time-col">16:30-17:30</td>
+                            <td>Admin/Emails/Slack</td>
+                        </tr>
+                        <tr>
+                            <td class="time-col">17:30-18:00</td>
+                            <td>Wind-down</td>
+                            <td rowspan="2">Evening Free</td>
+                        </tr>
+                        <tr>
+                            <td class="time-col">18:00-19:00</td>
+                            <td><strong>Workout/Walk</strong></td>
+                        </tr>
+                        <tr>
+                            <td class="time-col">19:00-20:00</td>
+                            <td>Dinner + Log</td>
+                            <td rowspan="2">Set Weekly Goals</td>
+                        </tr>
+                        <tr>
+                            <td class="time-col">20:00-22:00</td>
+                            <td>Gaming/Chill</td>
+                        </tr>
+                        <tr>
+                            <td class="time-col">22:00-23:00</td>
+                            <td>Wind-down</td>
+                            <td rowspan="2">Sleep by 1am</td>
+                        </tr>
+                        <tr>
+                            <td class="time-col">23:00-1:00</td>
+                            <td>Sleep Window</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        
+        <div class="content" id="templates">
+            <h2>Focus Templates</h2>
+            <div class="templates">
+                <div class="template-card">
+                    <h4>💻 Work Block</h4>
+                    <p><strong>90 mins deep work + 15 mins rest</strong></p>
+                    <p>Close all distractions. Single task focus. Break = walk, water, breathe.</p>
+                </div>
+                <div class="template-card">
+                    <h4>💪 Health Block</h4>
+                    <p><strong>Variable time</strong></p>
+                    <p>Eat mindfully. Move your body. Log everything.</p>
+                </div>
+                <div class="template-card">
+                    <h4>🎮 Gaming Block</h4>
+                    <p><strong>2 hrs max weekdays</strong></p>
+                    <p>Set timer before starting. Hard stop at limit. No gaming past midnight.</p>
+                </div>
+                <div class="template-card">
+                    <h4>🔄 Reset Block</h4>
+                    <p><strong>30-60 mins</strong></p>
+                    <p>Quick housework. Reflect on progress. Celebrate small wins.</p>
+                </div>
+            </div>
+            
+            <h3 style="margin-top: 30px;">🍽️ Meal Guidelines</h3>
+            <div class="templates">
+                <div class="template-card">
+                    <h4>Breakfast</h4>
+                    <p>High-protein, Low-GI: Eggs, Greek yogurt, oatmeal with nuts</p>
+                </div>
+                <div class="template-card">
+                    <h4>Lunch</h4>
+                    <p>Balanced plate: Whole grains + lean protein + vegetables</p>
+                </div>
+                <div class="template-card">
+                    <h4>Dinner</h4>
+                    <p>Protein + vegetables: Grilled chicken/fish, large salad, minimal starch</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="content" id="rules">
+            <h2>Key Rules for Success</h2>
+            <div class="rules">
+                <div class="rule">
+                    <h4>1. You don't need to be perfect—just consistent enough</h4>
+                    <p>Missing one workout or going over calories isn't failure. Just restart at the next block.</p>
+                </div>
+                <div class="rule">
+                    <h4>2. Every focus block = a win</h4>
+                    <p>Whether it's work, walking, or logging food—each completed block counts.</p>
+                </div>
+                <div class="rule">
+                    <h4>3. Always log food (even if over target)</h4>
+                    <p>No shame, just data. Awareness is the first step to change.</p>
+                </div>
+                <div class="rule">
+                    <h4>4. No all-or-nothing mindset</h4>
+                    <p>Bad morning? Afternoon is a fresh start. Bad day? Tomorrow is a new one.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Schedule data
+        const weekdaySchedule = [
+            { time: '9:00-9:30', task: 'Wake + Water + Movement', id: 'wake' },
+            { time: '9:30-10:00', task: 'Breakfast + Log', id: 'breakfast' },
+            { time: '10:00-12:00', task: 'Work Focus Block #1', id: 'work1' },
+            { time: '12:00-12:15', task: 'Movement Break', id: 'break1' },
+            { time: '12:15-14:00', task: 'Work Focus Block #2', id: 'work2' },
+            { time: '14:00-14:30', task: 'Lunch + Log', id: 'lunch' },
+            { time: '14:30-16:30', task: 'Work Focus Block #3', id: 'work3' },
+            { time: '16:30-17:30', task: 'Admin/Emails/Slack', id: 'admin' },
+            { time: '17:30-18:00', task: 'Wind-down', id: 'winddown1' },
+            { time: '18:00-19:00', task: 'Workout/Walk', id: 'workout' },
+            { time: '19:00-20:00', task: 'Dinner + Log', id: 'dinner' },
+            { time: '20:00-22:00', task: 'Gaming/Chill', id: 'gaming' },
+            { time: '22:00-23:00', task: 'Wind-down', id: 'winddown2' },
+            { time: '23:00-1:00', task: 'Sleep Window', id: 'sleep' }
+        ];
+        
+        const weekendSchedule = [
+            { time: '9:00-11:00', task: 'Flexible Wake', id: 'wake' },
+            { time: '11:00-12:00', task: 'Brunch + Walk', id: 'brunch' },
+            { time: 'Afternoon', task: 'Social/Errands/Hobbies', id: 'afternoon' },
+            { time: 'Evening', task: 'Gaming/Chill', id: 'evening' },
+            { time: 'Night', task: 'Set Weekly Goals', id: 'goals' },
+            { time: 'By 1:00', task: 'Sleep', id: 'sleep' }
+        ];
+        
+        // Initialize date
+        function updateDate() {
+            const now = new Date();
+            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+            document.getElementById('dateInfo').textContent = now.toLocaleDateString('en-US', options);
+            
+            // Determine if weekday or weekend
+            const isWeekend = now.getDay() === 0 || now.getDay() === 6;
+            return isWeekend;
+        }
+        
+        // Generate daily checklist
+        function generateChecklist() {
+            const isWeekend = updateDate();
+            const schedule = isWeekend ? weekendSchedule : weekdaySchedule;
+            const checklistDiv = document.getElementById('dailyChecklist');
+            
+            checklistDiv.innerHTML = '';
+            schedule.forEach(item => {
+                const block = document.createElement('div');
+                block.className = 'time-block';
+                block.innerHTML = `
+                    <input type="checkbox" id="${item.id}" onchange="updateProgress(); saveData()">
+                    <label for="${item.id}">
+                        <span class="time">${item.time}</span>
+                        ${item.task}
+                    </label>
+                `;
+                checklistDiv.appendChild(block);
+            });
+            
+            loadData();
+        }
+        
+        // Update progress bar
+        function updateProgress() {
+            const checkboxes = document.querySelectorAll('#dailyChecklist input[type="checkbox"]');
+            const checked = document.querySelectorAll('#dailyChecklist input[type="checkbox"]:checked');
+            const percentage = Math.round((checked.length / checkboxes.length) * 100);
+            
+            const progressBar = document.getElementById('progressBar');
+            progressBar.style.width = percentage + '%';
+            progressBar.textContent = percentage + '%';
+            
+            // Update completed style
+            checkboxes.forEach(cb => {
+                if (cb.checked) {
+                    cb.parentElement.classList.add('completed');
+                } else {
+                    cb.parentElement.classList.remove('completed');
+                }
+            });
+        }
+        
+        // Tab switching
+        function showTab(tabName) {
+            // Hide all content
+            document.querySelectorAll('.content').forEach(content => {
+                content.classList.remove('active');
+            });
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // Show selected content
+            document.getElementById(tabName).classList.add('active');
+            event.target.classList.add('active');
+        }
+        
+        // Save data to localStorage
+        function saveData() {
+            const today = new Date().toDateString();
+            const data = {
+                date: today,
+                checklist: {},
+                health: {
+                    calories: document.getElementById('calories').value,
+                    water: document.getElementById('water').value,
+                    steps: document.getElementById('steps').value,
+                    glucose: document.getElementById('glucose').value,
+                    weight: document.getElementById('weight').value
+                },
+                wins: [
+                    document.getElementById('win1').value,
+                    document.getElementById('win2').value,
+                    document.getElementById('win3').value
+                ]
+            };
+            
+            // Save checklist state
+            document.querySelectorAll('#dailyChecklist input[type="checkbox"]').forEach(cb => {
+                data.checklist[cb.id] = cb.checked;
+            });
+            
+            localStorage.setItem('routineData_' + today, JSON.stringify(data));
+        }
+        
+        // Load data from localStorage
+        function loadData() {
+            const today = new Date().toDateString();
+            const savedData = localStorage.getItem('routineData_' + today);
+            
+            if (savedData) {
+                const data = JSON.parse(savedData);
+                
+                // Load checklist
+                Object.keys(data.checklist).forEach(id => {
+                    const checkbox = document.getElementById(id);
+                    if (checkbox) {
+                        checkbox.checked = data.checklist[id];
+                    }
+                });
+                
+                // Load health metrics
+                document.getElementById('calories').value = data.health.calories || '';
+                document.getElementById('water').value = data.health.water || '';
+                document.getElementById('steps').value = data.health.steps || '';
+                document.getElementById('glucose').value = data.health.glucose || '';
+                document.getElementById('weight').value = data.health.weight || '';
+                
+                // Load wins
+                document.getElementById('win1').value = data.wins[0] || '';
+                document.getElementById('win2').value = data.wins[1] || '';
+                document.getElementById('win3').value = data.wins[2] || '';
+                
+                updateProgress();
+            }
+        }
+        
+        // Reset today's data
+        function resetDay() {
+            if (confirm('Reset all of today\'s data?')) {
+                const today = new Date().toDateString();
+                localStorage.removeItem('routineData_' + today);
+                location.reload();
+            }
+        }
+        
+        // Initialize on load
+        window.onload = function() {
+            generateChecklist();
+        };
+    </script>
+</body>
+</html>
